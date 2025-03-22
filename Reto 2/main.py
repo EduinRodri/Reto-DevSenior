@@ -15,60 +15,69 @@ CARACTERES_RECERVADOS = [
 
 
 MENU_PRINCIPAL = '''
-====Bienvenido a 🐾Huella Feliz🐾====
-1. 🤵  Clientes
-2. 👨‍⚕️  Veterinarios
-3. 🐾  Mascotas
-4. ⚙️  Servicios
-5. 📆  Agendar citas
-6. 🕜  Historial de citas (General)
-8. ⬅️  Salir
+==== Bienvenido a 🐾Huella Feliz🐾 ====
+1. 🤵 Clientes
+2. 👨‍⚕️ Veterinarios
+3. 🐾 Mascotas
+4. ⚙️ Servicios
+5. 📆 Agendar citas
+6. 🕜 Historial de citas (General)
+7. 🔙 Salir
 '''
 
-MENU_CLIENTE = '''
-===Cliente===
-1. Registrar cliente
-2. Modificar cliente
-3. Consultar clientes
-4. Eliminar cliente
-5. Salir
+SEPARADOR_MENU = "══════════════════════════════════════════════"
+
+MENU_CLIENTE = f'''
+{SEPARADOR_MENU}
+      👤 GESTIÓN DE CLIENTES
+{SEPARADOR_MENU}
+
+1️⃣  🆕 Registrar cliente
+2️⃣  ✏️ Modificar cliente
+3️⃣  🔍 Consultar clientes
+4️⃣  🗑️ Eliminar cliente
+5️⃣  🔙 Volver al menú principal
+
+{SEPARADOR_MENU}
 '''
+
 
 MENU_VETERINARIO = '''
-===Veterinario===
-1. Registrar veterinario
-2. Modificar veterinario
-3. Consultar veterinarios
-4. Eliminar veterinario
-5. Salir
+=== Veterinario ===
+1. 🆕 Registrar veterinario
+2. ✏️ Modificar veterinario
+3. 🔍 Consultar veterinarios
+4. 🗑️ Eliminar veterinario
+5. 🔙 Salir
 '''
 
 MENU_MASCOTA = '''
-===Mascota===
-1. Registrar mascota
-2. Modificar mascota
-3. Consultar mascotas
-4. Eliminar mascota
-5. Salir
+=== Mascota ===
+1. 🆕 Registrar mascota
+2. ✏️ Modificar mascota
+3. 🔍 Consultar mascotas
+4. 🗑️ Eliminar mascota
+5. 🔙 Salir
 '''
 
 MENU_SERVICIOS = '''
-1. Ver servicios
-2. Registrar Servicio
-3. Modificar Servicio
-4. Eliminar Servicio
-5. Salir
+=== Servicios ===
+1. 👀 Ver servicios
+2. 🆕 Registrar servicio
+3. ✏️ Modificar servicio
+4. 🗑️ Eliminar servicio
+5. 🔙 Salir
 '''
 
 MENU_AGENDAR_CITA = '''
-===Agendar Cita===
-1. Seleccionar Fecha
-2. Seleccionar Veterinario
-3. Seleccionar Servicio
-4. Seleccionar Mascota
-5. Seleccionar Cliente
-6. Aceptar
-7. Cancelar
+=== Agendar Cita ===
+1. 📅 Seleccionar Fecha
+2. 👨‍⚕️ Seleccionar Veterinario
+3. ⚙️ Seleccionar Servicio
+4. 🐾 Seleccionar Mascota
+5. 🤵 Seleccionar Cliente
+6. ✅ Aceptar
+7. ❌ Cancelar
 '''
 
 # funciones fundamentales para clases
@@ -124,8 +133,6 @@ class Cliente(Persona):
         array.append(self.__direccion)
         return array
     
-
-
 class Veterinario(Persona):
     def __init__(self, nombre, contacto, identidad, especialidad, licencia, horario):
         super().__init__(nombre, contacto, identidad)
@@ -163,7 +170,6 @@ class Veterinario(Persona):
         array.append(self.__licencia)
         array.append(self.__horario)
         return array
-            
 
 # * La clase Mascota en adelante no son extenciones de persona pero esta, servicios y citas se toman como tal en
 # * la clase Datos
@@ -642,6 +648,140 @@ def pedirNumero (pregunta: str):
         break
     return retorno
 
+#Funciones menus secundarios
+
+def menuClientes(datos: Datos):
+    datos.use = "clientes"
+
+    def seleccionarCliente():
+        print("══════════════════════════════════════════════")
+        print(" 📌 SELECCIONAR CLIENTE ")
+        print("══════════════════════════════════════════════")
+        mostrarTabla(datos.obtenerTabla())
+        
+        while True:
+            opcion = input("\n🔢 Número del cliente: ")
+            if opcion.isnumeric():
+                cliente = int(opcion) - 1
+                if 0 <= cliente < datos.largo():
+                    return cliente
+                else:
+                    print("⚠️ Número fuera de rango.")
+            else:
+                print("⚠️ Ingrese un número válido.")
+
+    while True:
+        borrarConsola()
+        print("══════════════════════════════════════════════")
+        print(" 👤 GESTIÓN DE CLIENTES ")
+        print("══════════════════════════════════════════════")
+        print(MENU_CLIENTE)
+
+        opcion = input("Seleccione una opción: ")
+
+        if opcion == "1":  # Registrar cliente
+            borrarConsola()
+            print("══════════════════════════════════════════════")
+            print(" 🆕 REGISTRO DE NUEVO CLIENTE ")
+            print("══════════════════════════════════════════════")
+
+            formulario = Formulario("\nRegistrar cliente\n", [])
+            formulario.agregarCampo("\nNombre", "str", lambda x: len(x) >= 2, "Debe tener al menos 2 caracteres.")
+            formulario.agregarCampo("\nTeléfono", "str", lambda x: len(str(x)) == 10, "Debe tener 10 dígitos.")
+            formulario.agregarCampo("\nDirección", "str", lambda x: len(x) >= 5, "Debe tener al menos 5 caracteres.")
+
+            resultado = formulario.realizar()
+            nombre = resultado["\nNombre"]
+            telefono = resultado["\nTeléfono"]
+            direccion = resultado["\nDirección"]
+
+            cliente = Cliente(nombre, telefono, datos.largo(), direccion)
+            datos.agregar(cliente)
+            datos.guardar()
+
+            print("\n✅ Cliente registrado con éxito.")
+            input("\n🔙 Presione Enter para continuar...")
+
+        elif opcion == "2":  # Modificar cliente
+            borrarConsola()
+            print("══════════════════════════════════════════════")
+            print(" ✏️ MODIFICAR CLIENTE ")
+            print("══════════════════════════════════════════════")
+
+            clienteIndex = seleccionarCliente()
+            if clienteIndex is not None:
+                clienteSeleccionado: Cliente = datos.obtener(clienteIndex)
+                print(f"\n✏️ Editando cliente: {clienteSeleccionado.getNombre()}")
+
+                formulario = Formulario("\nModificar cliente", [])
+                formulario.agregarCampo("\nNombre", "str", lambda x: len(x) == 0 or len(x) >= 2)
+                formulario.agregarCampo("\nTeléfono", "str", lambda x: len(str(x)) == 10 or len(str(x)) == 0)
+                formulario.agregarCampo("\nDirección", "str", lambda x: len(x) == 0 or len(x) >= 5)
+
+                resultado = formulario.realizar()
+
+                if resultado["\nNombre"]:
+                    clienteSeleccionado.setNombre(resultado["\nNombre"])
+                if resultado["\nTeléfono"]:
+                    clienteSeleccionado.setContacto(resultado["\nTeléfono"])
+                if resultado["\nDirección"]:
+                    clienteSeleccionado.setDireccion(resultado["\nDirección"])
+
+                datos.guardar()
+                print("\n✅ Cliente modificado con éxito.")
+                input("\n🔙 Presione Enter para continuar...")
+
+        elif opcion == "3":  # Listar clientes
+            borrarConsola()
+            print("══════════════════════════════════════════════")
+            print(" 📋 LISTADO DE CLIENTES ")
+            print("══════════════════════════════════════════════")
+            mostrarTabla(datos.obtenerTabla())
+
+            clienteIndex = seleccionarCliente()
+            if clienteIndex is not None:
+                clienteSeleccionado: Cliente = datos.obtener(clienteIndex)
+
+                print("══════════════════════════════════════════════")
+                print(f" 📋 DETALLES DEL CLIENTE: {clienteSeleccionado.getNombre()} ")
+                print("══════════════════════════════════════════════")
+                print(f"\n📌 Nombre: {clienteSeleccionado.getNombre()}")
+                print(f"\n📞 Teléfono: {clienteSeleccionado.getContacto()}")
+                print(f"\n📍 Dirección: {clienteSeleccionado.getDireccion()}")
+
+            input("\n🔙 Presione Enter para continuar...")
+
+        elif opcion == "4":  # Eliminar cliente
+            borrarConsola()
+            print("══════════════════════════════════════════════")
+            print(" 🗑️ ELIMINAR CLIENTE ")
+            print("══════════════════════════════════════════════")
+
+            clienteIndex = seleccionarCliente()
+            if clienteIndex is not None:
+                clienteSeleccionado: Cliente = datos.obtener(clienteIndex)
+                print(f"\n⚠️ ¿Está seguro de eliminar a {clienteSeleccionado.getNombre()}?")
+                print("\n1️⃣ Sí, eliminar cliente")
+                print("2️⃣ No, cancelar operación")
+
+                opcion = input("\nSeleccione una opción: ")
+                if opcion == "1":
+                    datos.eliminar(clienteIndex)
+                    datos.guardar()
+                    print("\n✅ Cliente eliminado con éxito.")
+                elif opcion == "2":
+                    print("\n⚠️ Operación cancelada.")
+                else:
+                    print("\n⚠️ Opción no válida. Intente de nuevo.")
+
+                input("\n🔙 Presione Enter para continuar...")
+
+        elif opcion == "5":  # Salir
+            break
+
+        else:
+            print("\n⚠️ Opción no válida. Intente de nuevo.")
+            input("\n🔙 Presione Enter para continuar...")
 
 
 def menuVeterinario(datos: Datos):
@@ -870,10 +1010,7 @@ def menuServicios (datos: Datos):
                 for element in realizar:
                     if listLambda[element]:
                         listLambda[element](realizar[element])
-                        pass
-                    pass
-                pass
-            pass
+
         elif opcion == "4":
             borrarConsola()
             indexServicioSeleccionado = seleccionarServicio()
@@ -886,11 +1023,6 @@ def menuServicios (datos: Datos):
             break
         else:
             print("Opcion no valida")
-        pass
-
-
-    pass
-
 
 def agendarCitas (datos: Datos):
     # TODO: Realizar el sistema de agendado de citas tomando en cuenta el horario del veterinario
@@ -959,10 +1091,6 @@ def agendarCitas (datos: Datos):
             break
         else:
             print("Opción no válida. Intente de nuevo.")
-        pass
-
-
-    pass
 
 # Main Programa
 def main():
@@ -975,24 +1103,18 @@ def main():
         print(MENU_PRINCIPAL)
         opcion = input("Seleccione una opción: ")
         if opcion == "1":
-            print("Clientes")
-            pass
+            menuClientes(datos)
         elif opcion == "2":
             menuVeterinario(datos)
-            pass
         elif opcion == "3":
             print("Mascotas")
-            pass
         elif opcion == "4":
             menuServicios(datos)
-            pass
         elif opcion == "5":
             agendarCitas(datos)
-            pass
         elif opcion == "6":
             # TODO: Hay que realizar el menu de historial de citas
             print("Historial de citas")
-            pass
         elif opcion == "7":
             print("👋 Saliendo del sistema. ¡Hasta luego!")
             break
