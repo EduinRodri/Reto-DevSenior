@@ -1,0 +1,24 @@
+Informe de experimentos 
+ 
+
+ 
+Experimento numero 1 
+Nombre: Recoleccion de zetas 
+Tipo: micologia 
+Fecha de realizacion: 2024-11-22 00:00:00 
+Resultados: 
+ |3|5|
+ 
+Experimento numero 2 
+Nombre: Revision de crecimiento 
+Tipo: botanica 
+Fecha de realizacion: 2024-11-27 00:00:00 
+Resultados: 
+ |7.0|8.0|6.0|
+ 
+Experimento numero 3 
+Nombre: Agua 
+Tipo: Biologia 
+Fecha de realizacion: 2024-12-06 
+Resultados: 
+ |12.0|
