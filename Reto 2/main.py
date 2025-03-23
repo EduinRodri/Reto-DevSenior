@@ -13,6 +13,7 @@ CARACTERES_RECERVADOS = [
     SEPARADOR_ELEMENTO, PROPIEDAD, AUTOINCREMENT
 ]
 
+SEPARADOR_MENU = "══════════════════════════════════════════════"
 
 MENU_PRINCIPAL = '''
 ==== Bienvenido a 🐾Huella Feliz🐾 ====
@@ -24,8 +25,6 @@ MENU_PRINCIPAL = '''
 6. 🕜 Historial de citas (General)
 7. 🔙 Salir
 '''
-
-SEPARADOR_MENU = "══════════════════════════════════════════════"
 
 MENU_CLIENTE = f'''
 {SEPARADOR_MENU}
@@ -51,22 +50,33 @@ MENU_VETERINARIO = '''
 5. 🔙 Salir
 '''
 
-MENU_MASCOTA = '''
-=== Mascota ===
-1. 🆕 Registrar mascota
-2. ✏️ Modificar mascota
-3. 🔍 Consultar mascotas
-4. 🗑️ Eliminar mascota
-5. 🔙 Salir
+MENU_MASCOTA = f'''
+{SEPARADOR_MENU}
+      🐶 GESTIÓN DE MASCOTAS
+{SEPARADOR_MENU}
+
+1️⃣  🆕 Registrar mascota
+2️⃣  ✏️ Modificar mascota
+3️⃣  🔍 Consultar mascotas
+4️⃣  🗑️ Eliminar mascota
+5️⃣  🔙 Volver al menú principal
+
+{SEPARADOR_MENU}
 '''
 
-MENU_SERVICIOS = '''
-=== Servicios ===
-1. 👀 Ver servicios
-2. 🆕 Registrar servicio
-3. ✏️ Modificar servicio
-4. 🗑️ Eliminar servicio
-5. 🔙 Salir
+
+MENU_SERVICIOS = f'''
+{SEPARADOR_MENU}
+      🏥 GESTIÓN DE SERVICIOS
+{SEPARADOR_MENU}
+
+1️⃣  👀 Ver servicios
+2️⃣  🆕 Registrar servicio
+3️⃣  ✏️ Modificar servicio
+4️⃣  🗑️ Eliminar servicio
+5️⃣  🔙 Volver al menú principal
+
+{SEPARADOR_MENU}
 '''
 
 MENU_AGENDAR_CITA = '''
@@ -922,107 +932,278 @@ def menuVeterinario(datos: Datos):
         else:
             print("Opción no válida. Intente de nuevo.")
         
+def menuMascotas(datos: Datos):
+    datos.use = "mascotas"
 
+    def seleccionarMascota():
+        print("══════════════════════════════════════════════")
+        print(" 📌 SELECCIONAR MASCOTA ")
+        print("══════════════════════════════════════════════")
+        mostrarTabla(datos.obtenerTabla())
 
-def menuServicios (datos: Datos):
-    datos.use = "servicios"
-    borrarConsola()
-    
-    while True:
-        print(MENU_SERVICIOS)
-        opcion = input("Seleccione una opcion: ")
-
-        def seleccionarServicio (needIndex = False):
-            mostrarServicios(datos.obtenerTabla())
-            resultado = False
-            while True:
-                select = input("Seleccione un servicio o precione enter sin escribir nada para ir atras")
-                if select == "":
-                    borrarConsola()
-                    break
-                elif select.isnumeric():
-                    borrarConsola()
-                    index = int(select)-1
-                    servicioSeleccionado: Servicio = datos.obtener(index)
-                    resultado = servicioSeleccionado
-                    if needIndex:
-                        resultado = index
-                    break
+        while True:
+            opcion = input("\n🔢 Número de la mascota: ")
+            if opcion.isnumeric():
+                mascota = int(opcion) - 1
+                if 0 <= mascota < datos.largo():
+                    return mascota
                 else:
-                    print("Opcion no valida, por favor, ingrese un numero o de enter sin escribir nada")
-                    pass
-                pass
-            return resultado
+                    print("⚠️ Número fuera de rango.")
+            else:
+                print("⚠️ Ingrese un número válido.")
 
-        if opcion == "1":
+    while True:
+        borrarConsola()
+        print(MENU_MASCOTA)
+        opcion = input("Seleccione una opción: ")
+
+        if opcion == "1":  # Registrar mascota
+            borrarConsola()
+            print("══════════════════════════════════════════════")
+            print(" 🆕 REGISTRO DE NUEVA MASCOTA ")
+            print("══════════════════════════════════════════════")
+
+            formulario = Formulario("\nRegistrar mascota", [])
+            formulario.agregarCampo("\nNombre", "str", lambda x: len(x) >= 2, "Debe tener al menos 2 caracteres.")
+            formulario.agregarCampo("\nEspecie", "str", lambda x: len(x) >= 3, "Debe tener al menos 3 caracteres.")
+            formulario.agregarCampo("\nRaza", "str", lambda x: len(x) >= 3, "Debe tener al menos 3 caracteres.")
+            formulario.agregarCampo("\nEdad", "int", lambda x: int(x) > 0, "Debe ser un número mayor que 0.")
+            formulario.agregarCampo("\nID del dueño", "int", lambda x: int(x) >= 0, "Debe ser un número positivo.")
+
+            resultado = formulario.realizar()
+
+            nombre = resultado["\nNombre"]
+            especie = resultado["\nEspecie"]
+            raza = resultado["\nRaza"]
+            edad = resultado["\nEdad"]
+            dueño = resultado["\nID del dueño"]
+
+            mascota = Mascota(nombre, especie, raza, edad, datos.largo(), dueño)
+            datos.agregar(mascota)
+            datos.guardar()
+
+            print("\n✅ Mascota registrada con éxito.")
+            input("\n🔙 Presione Enter para continuar...")
+
+        elif opcion == "2":  # Modificar mascota
+            borrarConsola()
+            print("══════════════════════════════════════════════")
+            print(" ✏️ MODIFICAR MASCOTA ")
+            print("══════════════════════════════════════════════")
+
+            mascotaIndex = seleccionarMascota()
+            if mascotaIndex is not None:
+                mascotaSeleccionada: Mascota = datos.obtener(mascotaIndex)
+                print(f"\n✏️ Editando mascota: {mascotaSeleccionada.getNombre()}")
+
+                formulario = Formulario("\nModificar mascota", [])
+                formulario.agregarCampo("\nNombre", "str", lambda x: len(x) == 0 or len(x) >= 2)
+                formulario.agregarCampo("\nEspecie", "str", lambda x: len(x) == 0 or len(x) >= 3)
+                formulario.agregarCampo("\nRaza", "str", lambda x: len(x) == 0 or len(x) >= 3)
+                formulario.agregarCampo("\nEdad", "str", lambda x: int(x) > 0 or len(str(x)) == 0)
+                formulario.agregarCampo("\nID del dueño", "int", lambda x: int(x) >= 0 or len(str(x)) == 0)
+
+                resultado = formulario.realizar()
+
+                if resultado["\nNombre"]:
+                    mascotaSeleccionada.setNombre(resultado["\nNombre"])
+                if resultado["\nEspecie"]:
+                    mascotaSeleccionada.setEspecie(resultado["\nEspecie"])
+                if resultado["\nRaza"]:
+                    mascotaSeleccionada.setRaza(resultado["\nRaza"])
+                if resultado["\nEdad"]:
+                    mascotaSeleccionada.setEdad(resultado["\nEdad"])
+                if resultado["\nID del dueño"]:
+                    mascotaSeleccionada.setDueño(resultado["\nID del dueño"])
+
+                datos.guardar()
+                print("\n✅ Mascota modificada con éxito.")
+                input("\n🔙 Presione Enter para continuar...")
+
+        elif opcion == "3":  # Consultar mascota
+            borrarConsola()
+            print("══════════════════════════════════════════════")
+            print(" 📋 CONSULTAR MASCOTA ")
+            print("══════════════════════════════════════════════")
+
+            mascotaIndex = seleccionarMascota()
+            if mascotaIndex is not None:
+                mascota: Mascota = datos.obtener(mascotaIndex)
+
+                print("══════════════════════════════════════════════")
+                print(f" 📋 INFORMACIÓN DE LA MASCOTA: {mascota.getNombre()} ")
+                print("══════════════════════════════════════════════")
+                print(f"\n🐾 Nombre: {mascota.getNombre()}")
+                print(f"\n🦴 Especie: {mascota.getEspecie()}")
+                print(f"\n🐕 Raza: {mascota.getRaza()}")
+                print(f"\n🎂 Edad: {mascota.getEdad()} años")
+                print(f"\n👤 ID Dueño: {mascota.getDueño()}")
+
+            input("\n🔙 Presione Enter para volver...")
+
+        elif opcion == "4":  # Eliminar mascota
+            borrarConsola()
+            print("══════════════════════════════════════════════")
+            print(" 🗑️ ELIMINAR MASCOTA ")
+            print("══════════════════════════════════════════════")
+
+            mascotaIndex = seleccionarMascota()
+            if mascotaIndex is not None:
+                mascota = datos.obtener(mascotaIndex)
+                print(f"\n⚠️ ¿Está seguro de eliminar a {mascota.getNombre()}?")
+                print("\n1️⃣ Sí, eliminar mascota")
+                print("2️⃣ No, cancelar operación")
+
+                respuesta = input("\nSeleccione una opción: ")
+                if respuesta == "1":
+                    datos.eliminar(mascotaIndex)
+                    datos.guardar()
+                    print("\n✅ Mascota eliminada con éxito.")
+                elif respuesta == "2":
+                    print("\n⚠️ Operación cancelada.")
+                else:
+                    print("\n⚠️ Opción no válida. Intente de nuevo.")
+
+                input("\n🔙 Presione Enter para continuar...")
+
+        elif opcion == "5":  # Salir del menú
+            break
+
+        else:
+            print("\n⚠️ Opción no válida. Intente de nuevo.")
+            input("\n🔙 Presione Enter para continuar...")
+
+
+def menuServicios(datos: Datos):
+    datos.use = "servicios"
+
+    def seleccionarServicio(needIndex=False):
+        print("══════════════════════════════════════════════")
+        print(" 📌 SELECCIONAR SERVICIO ")
+        print("══════════════════════════════════════════════")
+        mostrarServicios(datos.obtenerTabla())
+
+        resultado = False
+        while True:
+            select = input("\n🔢 Seleccione un servicio (o presione Enter para volver): ")
+            if select == "":
+                borrarConsola()
+                break
+            elif select.isnumeric():
+                borrarConsola()
+                index = int(select) - 1
+                servicioSeleccionado: Servicio = datos.obtener(index)
+                resultado = servicioSeleccionado if not needIndex else index
+                break
+            else:
+                print("⚠️ Opción no válida. Ingrese un número o presione Enter para volver.")
+        return resultado
+
+    while True:
+        borrarConsola()
+        print(MENU_SERVICIOS)
+        opcion = input("Seleccione una opción: ")
+
+        if opcion == "1":  # Ver servicios
             borrarConsola()
             servicioSeleccionado = seleccionarServicio()
             if servicioSeleccionado:
-                print("==== Informacion del servicio ====")
-                print(f"Descripcion: {servicioSeleccionado.getDescripcion()}")
-                print(f"Tipo: {servicioSeleccionado.getTipo()}")
-                print(f"Duracion: {servicioSeleccionado.getDuracion()} minutos")
-                print(f"Frecuencia {servicioSeleccionado.getFrecuencia()} meses")
-                print(f"Costo: ${servicioSeleccionado.getCosto()}")
-                input("Precione enter para continuar ")
-        elif opcion == "2":
-            # Tenemos que hacer un formulario de registro
+                print("══════════════════════════════════════════════")
+                print(" 📋 INFORMACIÓN DEL SERVICIO ")
+                print("══════════════════════════════════════════════")
+                print(f"\n📄 Descripción: {servicioSeleccionado.getDescripcion()}")
+                print(f"\n🛠️ Tipo: {servicioSeleccionado.getTipo()}")
+                print(f"\n⏳ Duración: {servicioSeleccionado.getDuracion()} minutos")
+                print(f"\n📆 Frecuencia: {servicioSeleccionado.getFrecuencia()} meses")
+                print(f"\n💰 Costo: ${servicioSeleccionado.getCosto()}")
+                input("\n🔙 Presione Enter para continuar...")
+
+        elif opcion == "2":  # Registrar servicio
             borrarConsola()
-            formulario = Formulario("=== Registro de Servicio ===", [])
-            formulario.agregarCampo('Ingrese el tipo de servicio', 'str', lambda x: len(x) >= 3, 'Por favor digite un campo con al menos 3 caracteres')
-            formulario.agregarCampo('Descripcion del servicio', 'str', lambda x: len(x) >= 3, 'Por favor digite un campo con al menos 3 caracteres')
-            formulario.agregarCampo('Duracion en minutos del servicio', 'float')
-            formulario.agregarCampo('Frecuencia optima del servicio en meses', 'float')
-            formulario.agregarCampo('Costo del servicio', 'float')
+            print("══════════════════════════════════════════════")
+            print(" 🆕 REGISTRO DE SERVICIO ")
+            print("══════════════════════════════════════════════")
+
+            formulario = Formulario("\nRegistrar Servicio", [])
+            formulario.agregarCampo("\nTipo de servicio", "str", lambda x: len(x) >= 3, "Debe tener al menos 3 caracteres.")
+            formulario.agregarCampo("\nDescripción del servicio", "str", lambda x: len(x) >= 3, "Debe tener al menos 3 caracteres.")
+            formulario.agregarCampo("\nDuración en minutos", "float")
+            formulario.agregarCampo("\nFrecuencia óptima en meses", "float")
+            formulario.agregarCampo("\nCosto del servicio", "float")
 
             realizar = formulario.realizar()
-            tipo = realizar['Ingrese el tipo de servicio']
-            descripcion = realizar['Descripcion del servicio']
-            duracion = realizar['Duracion en minutos del servicio']
-            frecuencia = realizar['Frecuencia optima del servicio en meses']
-            costo = realizar['Costo del servicio']
+            tipo = realizar["\nTipo de servicio"]
+            descripcion = realizar["\nDescripción del servicio"]
+            duracion = realizar["\nDuración en minutos"]
+            frecuencia = realizar["\nFrecuencia óptima en meses"]
+            costo = realizar["\nCosto del servicio"]
 
             nuevoServicio = Servicio(tipo, descripcion, duracion, costo, frecuencia)
             datos.agregar(nuevoServicio)
             datos.guardar()
-            pass
-        elif opcion == "3":
+
+            print("\n✅ Servicio registrado con éxito.")
+            input("\n🔙 Presione Enter para continuar...")
+
+        elif opcion == "3":  # Modificar servicio
             borrarConsola()
+            print("══════════════════════════════════════════════")
+            print(" ✏️ MODIFICAR SERVICIO ")
+            print("══════════════════════════════════════════════")
+
             servicioSeleccionado = seleccionarServicio()
             if servicioSeleccionado:
-                formulario = Formulario("=== Modificacion de servicio === \n (Escriba enter sin nada para dejar el servicio tal como estaba)", [])
-                formulario.agregarCampo("Tipo", 'str', lambda x: len(x) == 0 or len(x) > 3, 'Por favor digite un campo con al menos tres caracteres')
-                formulario.agregarCampo("Descripcion", 'str', lambda x: len(x) == 0 or len(x) > 3, 'Por favor digite un campo con al menos tres caracteres')
-                formulario.agregarCampo("Duracion", 'float')
-                formulario.agregarCampo('Frecuencia', 'float')
-                formulario.agregarCampo("Costo", 'float')
+                formulario = Formulario(
+                    "Modificar Servicio (Presione Enter sin escribir nada para dejarlo igual)", []
+                )
+                formulario.agregarCampo("\nTipo", "str", lambda x: len(x) == 0 or len(x) > 3, "Debe tener al menos 3 caracteres.")
+                formulario.agregarCampo("\nDescripción", "str", lambda x: len(x) == 0 or len(x) > 3, "Debe tener al menos 3 caracteres.")
+                formulario.agregarCampo("\nDuración", "float")
+                formulario.agregarCampo("\nFrecuencia", "float")
+                formulario.agregarCampo("\nCosto", "float")
 
                 realizar = formulario.realizar()
-
                 listLambda = {
-                    "Tipo": lambda x: servicioSeleccionado.setTipo(x),
-                    "Descripcion": lambda x: servicioSeleccionado.setDescripcion(x),
-                    "Duracion": lambda x: servicioSeleccionado.setDuracion(x),
-                    "Frecuencia": lambda x: servicioSeleccionado.setFrecuencia(x),
-                    "Costo": lambda x: servicioSeleccionado.setCosto(x)
+                    "\nTipo": lambda x: servicioSeleccionado.setTipo(x),
+                    "\nDescripción": lambda x: servicioSeleccionado.setDescripcion(x),
+                    "\nDuración": lambda x: servicioSeleccionado.setDuracion(x),
+                    "\nFrecuencia": lambda x: servicioSeleccionado.setFrecuencia(x),
+                    "\nCosto": lambda x: servicioSeleccionado.setCosto(x),
                 }
 
                 for element in realizar:
-                    if listLambda[element]:
+                    if realizar[element]:
                         listLambda[element](realizar[element])
 
-        elif opcion == "4":
+                datos.guardar()
+                print("\n✅ Servicio modificado con éxito.")
+                input("\n🔙 Presione Enter para continuar...")
+
+        elif opcion == "4":  # Eliminar servicio
             borrarConsola()
-            indexServicioSeleccionado = seleccionarServicio()
-            if indexServicioSeleccionado:
-                deseaEliminar = preguntar("¿Esta seguro de eliminar este servicio?")
-                if deseaEliminar:
+            print("══════════════════════════════════════════════")
+            print(" 🗑️ ELIMINAR SERVICIO ")
+            print("══════════════════════════════════════════════")
+
+            indexServicioSeleccionado = seleccionarServicio(True)
+            if indexServicioSeleccionado is not False:
+                deseaEliminar = input("⚠️ ¿Está seguro de eliminar este servicio? (S/N): ").strip().lower()
+                if deseaEliminar == "s":
                     datos.eliminar(indexServicioSeleccionado)
-                    pass
-        elif opcion == "5":
+                    datos.guardar()
+                    print("\n✅ Servicio eliminado con éxito.")
+                else:
+                    print("\n⚠️ Operación cancelada.")
+
+                input("\n🔙 Presione Enter para continuar...")
+
+        elif opcion == "5":  # Salir
             break
+
         else:
-            print("Opcion no valida")
+            print("\n⚠️ Opción no válida. Intente de nuevo.")
+            input("\n🔙 Presione Enter para continuar...")
+
 
 def agendarCitas (datos: Datos):
     # TODO: Realizar el sistema de agendado de citas tomando en cuenta el horario del veterinario
@@ -1107,7 +1288,7 @@ def main():
         elif opcion == "2":
             menuVeterinario(datos)
         elif opcion == "3":
-            print("Mascotas")
+            menuMascotas(datos)
         elif opcion == "4":
             menuServicios(datos)
         elif opcion == "5":
